@@ -1,0 +1,80 @@
+{
+  "name": "routeros-hex-decoder",
+  "displayName": "RouterOS Hex Decoder",
+  "description": "Decode RouterOS \\XX hex-encoded UTF-8 sequences in .rsc config exports. Hover preview, inline display, and toggle command.",
+  "icon": "icon/RouterOS_HD.png",
+  "version": "0.2.1",
+  "publisher": "dennis",
+  "license": "SEE LICENSE IN readme.md",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:routeros",
+    "onCommand:routerosEncoding.toggle"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "routerosEncoding.toggle",
+        "title": "RouterOS: Toggle Hex Encoding Display"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "routerosEncoding.toggle",
+        "key": "ctrl+shift+r",
+        "when": "editorLangId == routeros"
+      },
+      {
+        "command": "routerosEncoding.toggle",
+        "key": "ctrl+alt+r",
+        "when": "editorLangId == routeros"
+      }
+    ],
+    "configuration": {
+      "title": "RouterOS Hex Decoder",
+      "properties": {
+        "routerosHexDecoder.showHoverTitle": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show 'Decoded:' title in hover preview"
+        },
+        "routerosHexDecoder.inlinePrefix": {
+          "type": "string",
+          "default": " (→ ",
+          "description": "Opening sequence for inline decoded text"
+        },
+        "routerosHexDecoder.inlineSuffix": {
+          "type": "string",
+          "default": ")",
+          "description": "Closing sequence for inline decoded text"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "routeros",
+        "extensions": [
+          ".rsc"
+        ],
+        "aliases": [
+          "RouterOS Script"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}
