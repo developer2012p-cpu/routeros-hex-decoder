@@ -6,6 +6,7 @@ tsconfig.json
 .vscode-test/**
 .gitignore
 .vscodeignore
+test.rsc
 **/*.map
 icon/**
 !icon/RouterOS_HD.png
