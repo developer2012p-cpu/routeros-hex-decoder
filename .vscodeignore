@@ -4,6 +4,7 @@ tsconfig.json
 **/*.ts
 .vscode/**
 .vscode-test/**
+.github/**
 .gitignore
 .vscodeignore
 test.rsc
