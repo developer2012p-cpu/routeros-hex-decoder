@@ -4,7 +4,7 @@
   "description": "Decode RouterOS \\XX hex-encoded UTF-8 sequences in .rsc config exports. Hover preview, inline display, and toggle command.",
   "icon": "icon/RouterOS_HD.png",
   "version": "0.2.2",
-  "publisher": "dennis",
+  "publisher": "developer2012p",
   "license": "SEE LICENSE IN readme.md",
   "repository": {
     "type": "git",
