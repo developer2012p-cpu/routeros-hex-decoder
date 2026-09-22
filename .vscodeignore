@@ -2,6 +2,10 @@ src/**
 node_modules/**
 tsconfig.json
 **/*.ts
-!out/**
+.vscode/**
+.vscode-test/**
+.gitignore
+.vscodeignore
+**/*.map
 icon/**
 !icon/RouterOS_HD.png
