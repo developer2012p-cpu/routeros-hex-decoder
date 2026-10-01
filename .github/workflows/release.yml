@@ -25,11 +25,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compile
-        run: npm run compile
+      - name: Test and compile
+        run: npm test
+
+      - name: Read extension version
+        id: version
+        run: echo "number=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches extension version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: test "$GITHUB_REF_NAME" = "v${{ steps.version.outputs.number }}"
 
       - name: Package VSIX
-        run: npx --yes @vscode/vsce package --out routeros-hex-decoder-${{ github.ref_name }}.vsix
+        run: npx --yes @vscode/vsce package --out routeros-hex-decoder-${{ steps.version.outputs.number }}.vsix
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -46,6 +54,6 @@ jobs:
 
       - name: Publish to Marketplace
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npx --yes @vscode/vsce publish --packagePath routeros-hex-decoder-${{ github.ref_name }}.vsix
+        run: npx --yes @vscode/vsce publish --packagePath routeros-hex-decoder-${{ steps.version.outputs.number }}.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

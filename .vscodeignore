@@ -1,5 +1,7 @@
 src/**
 node_modules/**
+.kilo/**
+out/**/*.test.js
 tsconfig.json
 **/*.ts
 .vscode/**

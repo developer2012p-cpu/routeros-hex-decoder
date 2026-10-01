@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { extractSearchFields, findInFields, SearchMatch, SearchMode } from './commentSearch';
 
 const HEX_PATTERN = /\\([0-9A-Fa-f]{2})/g;
 // Matches quoted strings that may span multiple lines with backslash continuation
@@ -163,6 +164,78 @@ export function activate(context: vscode.ExtensionContext) {
     },
   };
 
+  const searchCommand = vscode.commands.registerCommand('routerosEncoding.searchComments', () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || editor.document.languageId !== 'routeros') {
+      vscode.window.showInformationMessage('Open a RouterOS .rsc file to search comments.');
+      return;
+    }
+
+    let mode: SearchMode = 'commentsAndSource';
+    const scopeButton: vscode.QuickInputButton = {
+      iconPath: new vscode.ThemeIcon('filter'),
+      tooltip: 'Search comments and scripts — click to search comments only',
+    };
+    const document = editor.document;
+    let indexedVersion = -1;
+    let fields: ReturnType<typeof extractSearchFields> = [];
+    const picker = vscode.window.createQuickPick<vscode.QuickPickItem & { match: SearchMatch }>();
+    picker.placeholder = 'Find text in comments and scripts (click filter to change scope)';
+    picker.buttons = [scopeButton];
+    picker.matchOnDescription = true;
+    picker.matchOnDetail = false;
+    const update = () => {
+      const query = picker.value;
+      if (!query) {
+        picker.items = [];
+        picker.title = mode === 'commentsAndSource' ? 'Search comments and scripts' : 'Search comments only';
+        return;
+      }
+      if (document.version !== indexedVersion) {
+        fields = extractSearchFields(document.getText());
+        indexedVersion = document.version;
+      }
+      const matches = findInFields(fields, query, mode);
+      picker.items = matches.map(match => {
+        const line = document.positionAt(match.start).line + 1;
+        const preview = match.field.text.slice(Math.max(0, match.decodedOffset - 30),
+          match.decodedOffset + match.decodedLength + 50).replace(/\s+/g, ' ');
+        return {
+          label: `${match.field.kind} · line ${line}`,
+          description: preview,
+          alwaysShow: true,
+          match,
+        };
+      });
+      picker.title = `${mode === 'commentsAndSource' ? 'Comments and scripts' : 'Comments only'} · ${matches.length} result${matches.length === 1 ? '' : 's'}`;
+    };
+    picker.onDidTriggerButton(button => {
+      if (button !== scopeButton) return;
+      mode = mode === 'commentsAndSource' ? 'comments' : 'commentsAndSource';
+      picker.placeholder = mode === 'commentsAndSource'
+        ? 'Find text in comments and scripts (click filter to change scope)'
+        : 'Find text in comments only (click filter to include scripts)';
+      update();
+    });
+    picker.onDidChangeValue(update);
+    const documentListener = vscode.workspace.onDidChangeTextDocument(e => {
+      if (e.document === document) update();
+    });
+    picker.onDidAccept(() => {
+      const selected = picker.selectedItems[0];
+      if (!selected) return;
+      const range = new vscode.Range(document.positionAt(selected.match.start), document.positionAt(selected.match.end));
+      editor.selection = new vscode.Selection(range.start, range.end);
+      editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+      picker.hide();
+    });
+    picker.onDidHide(() => {
+      documentListener.dispose();
+      picker.dispose();
+    });
+    picker.show();
+  });
+
   const toggleCommand = vscode.commands.registerCommand('routerosEncoding.toggle', () => {
     showDecoded = !showDecoded;
     vscode.window.showInformationMessage(
@@ -186,6 +259,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     decorationType,
     toggleCommand,
+    searchCommand,
     configListener,
     vscode.languages.registerHoverProvider('routeros', hoverProvider),
     vscode.window.onDidChangeActiveTextEditor(updateDecorations),

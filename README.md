@@ -7,6 +7,7 @@ VS Code extension for decoding RouterOS `\XX` hex-encoded UTF-8 sequences in `.r
 - **Hover Preview** — hover over any quoted string containing hex sequences to see the decoded UTF-8 text
 - **Inline Decoration** — decoded text displayed inline before the closing quote (toggleable)
 - **Multiline Support** — correctly handles RouterOS backslash-continued strings across multiple lines
+- **Comment Search** — search decoded UTF-8 text in `comment=` values, optionally including the entire text of `source=` scripts in the current `.rsc` file
 - **Configurable** — customize hover title visibility and inline delimiters via Settings
 
 ## Keyboard Shortcuts
@@ -15,8 +16,9 @@ VS Code extension for decoding RouterOS `\XX` hex-encoded UTF-8 sequences in `.r
 |---|---|
 | `Ctrl+Shift+R` | Toggle inline decoded text on/off |
 | `Ctrl+Alt+R` | Toggle inline decoded text on/off (alternative) |
+| `Ctrl+Alt+F` | Find text in decoded comments and scripts (switch scope using the filter button) |
 
-Both shortcuts are active only when editing `.rsc` files.
+These shortcuts are active only when editing `.rsc` files.
 
 ## Settings
 
@@ -35,7 +37,8 @@ Changes apply immediately without reloading.
 1. Open any `.rsc` file in VS Code
 2. Hover over hex-encoded strings (e.g., `"\D0\94\D0\B8\D0\B0\D0\BF\D0\B0\D0\B7\D0\BE\D0\BD LAN"`) to see decoded preview
 3. Press `Ctrl+Shift+R` to toggle inline decoded text display
-4. Customize appearance via Settings if needed
+4. Run **RouterOS HD: Find Text in Comments** from the Command Palette (`Ctrl+Shift+P`) or press `Ctrl+Alt+F`, then type a query. Search includes both `comment=` and the entire `source=` text by default. Click the filter button in the search box to switch to comments only (or back) without clearing the query. Select a result to highlight its exact source bytes (including `\XX` sequences). Search is case-insensitive and covers only the active `.rsc` file; scripts include all text, not only `#` comments.
+5. Customize appearance via Settings if needed
 
 ## Versioning
 
