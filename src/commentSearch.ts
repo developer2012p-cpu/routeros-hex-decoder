@@ -150,7 +150,9 @@ function skipQuoted(input: string, start: number): number {
 
 export function findInFields(fields: SearchField[], query: string, mode: SearchMode): SearchMatch[] {
   if (!query) return [];
-  const pattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(query.startsWith(' ') && query.length > 1
+    ? `(?:(?:^|(?<=\"))${escaped.slice(1)}|${escaped})` : escaped, 'giu');
   const results: SearchMatch[] = [];
   for (const field of fields) {
     if (field.kind === 'source' && mode === 'comments') continue;

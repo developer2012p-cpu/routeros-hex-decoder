@@ -3,7 +3,7 @@
   "displayName": "RouterOS Hex Decoder",
   "description": "Decode RouterOS \\XX hex-encoded UTF-8 in .rsc exports, with hover, inline display, and decoded comment and script search.",
   "icon": "icon/RouterOS_HD.png",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "publisher": "developer2012p",
   "license": "SEE LICENSE IN readme.md",
   "repository": {
@@ -23,6 +23,7 @@
   "activationEvents": [
     "onLanguage:routeros",
     "onCommand:routerosEncoding.toggle",
+    "onCommand:routerosEncoding.toggleHover",
     "onCommand:routerosEncoding.searchComments"
   ],
   "main": "./out/extension.js",
@@ -33,6 +34,10 @@
         "title": "RouterOS HD: Toggle Hex Encoding Display"
       },
       {
+        "command": "routerosEncoding.toggleHover",
+        "title": "RouterOS HD: Toggle Hover Preview"
+      },
+      {
         "command": "routerosEncoding.searchComments",
         "title": "RouterOS HD: Find Text in Comments"
       }
@@ -40,11 +45,11 @@
     "keybindings": [
       {
         "command": "routerosEncoding.toggle",
-        "key": "ctrl+shift+r",
+        "key": "ctrl+alt+d",
         "when": "editorLangId == routeros"
       },
       {
-        "command": "routerosEncoding.toggle",
+        "command": "routerosEncoding.toggleHover",
         "key": "ctrl+alt+r",
         "when": "editorLangId == routeros"
       },

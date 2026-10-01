@@ -16,6 +16,20 @@ test('searches decoded UTF-8 and literal text in comments, case-insensitively', 
   assert.equal(search(input, 'имя').length, 0);
 });
 
+test('leading space also matches the start of a quoted comment but not a word suffix', () => {
+  const input = 'add comment="LAN интерфейс"\nadd comment="HomeLAN интерфейс"\n'
+    + 'add comment="Office LAN интерфейс"\nadd comment="\\4C\\41\\4E интерфейс"';
+  const matches = search(input, ' lan');
+  assert.deepEqual(matches.map(match => input.slice(match.start, match.end)), ['LAN', ' LAN', '\\4C\\41\\4E']);
+  assert.deepEqual(matches.map(match => match.decodedLength), [3, 4, 3]);
+  assert.equal(search(input, 'lan').length, 4);
+  assert.equal(search(input, ' LAN').length, 3);
+  assert.equal(search('add comment="LAN интерфейс"', ' ').length, 1);
+  const script = 'add source=":log info \\"LAN интерфейс\\"; :log info \\"HomeLAN\\""';
+  assert.equal(search(script, ' lan').length, 0);
+  assert.equal(search(script, ' lan', 'commentsAndSource').length, 1);
+});
+
 test('finds mixed encoded and literal text across continued lines', () => {
   const input = 'add comment="test \\D0\\9F\\D1\\80\\D0\\B8\\D0\\B2\\D0\\B5\\D1\\82 \\D0\\\n    \\BC\\D0\\B8\\D1\\80"';
   const match = search(input, 'привет ми')[0];

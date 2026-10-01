@@ -4,7 +4,7 @@ VS Code extension for decoding RouterOS `\XX` hex-encoded UTF-8 sequences in `.r
 
 ## Features
 
-- **Hover Preview** — hover over any quoted string containing hex sequences to see the decoded UTF-8 text
+- **Hover Preview** — hover over any quoted string containing hex sequences to see the decoded UTF-8 text (toggleable)
 - **Inline Decoration** — decoded text displayed inline before the closing quote (toggleable)
 - **Multiline Support** — correctly handles RouterOS backslash-continued strings across multiple lines
 - **Comment Search** — search decoded UTF-8 text in `comment=` values, optionally including the entire text of `source=` scripts in the current `.rsc` file
@@ -14,8 +14,8 @@ VS Code extension for decoding RouterOS `\XX` hex-encoded UTF-8 sequences in `.r
 
 | Shortcut | Action |
 |---|---|
-| `Ctrl+Shift+R` | Toggle inline decoded text on/off |
-| `Ctrl+Alt+R` | Toggle inline decoded text on/off (alternative) |
+| `Ctrl+Alt+R` | Toggle hover preview on/off |
+| `Ctrl+Alt+D` | Toggle inline decoded text on/off |
 | `Ctrl+Alt+F` | Find text in decoded comments and scripts (switch scope using the filter button) |
 
 These shortcuts are active only when editing `.rsc` files.
@@ -36,9 +36,13 @@ Changes apply immediately without reloading.
 
 1. Open any `.rsc` file in VS Code
 2. Hover over hex-encoded strings (e.g., `"\D0\94\D0\B8\D0\B0\D0\BF\D0\B0\D0\B7\D0\BE\D0\BD LAN"`) to see decoded preview
-3. Press `Ctrl+Shift+R` to toggle inline decoded text display
-4. Run **RouterOS HD: Find Text in Comments** from the Command Palette (`Ctrl+Shift+P`) or press `Ctrl+Alt+F`, then type a query. Search includes both `comment=` and the entire `source=` text by default. Click the filter button in the search box to switch to comments only (or back) without clearing the query. Select a result to highlight its exact source bytes (including `\XX` sequences). Search is case-insensitive and covers only the active `.rsc` file; scripts include all text, not only `#` comments.
+3. Press `Ctrl+Alt+R` to toggle hover previews or `Ctrl+Alt+D` to toggle inline decoded text display
+4. Run **RouterOS HD: Find Text in Comments** from the Command Palette (`Ctrl+Shift+P`) or press `Ctrl+Alt+F`, then type a query. Search includes both `comment=` and the entire `source=` text by default. Click the filter button in the search box to switch to comments only (or back) without clearing the query. Select a result to highlight its exact source bytes (including `\XX` sequences). Search is case-insensitive and covers only the active `.rsc` file; scripts include all text, not only `#` comments. A query beginning with a space (for example, ` lan`) also matches at the start of a value immediately after the opening quote (`comment="LAN интерфейс"`), but not inside a word (`comment="HomeLAN интерфейс"`).
 5. Customize appearance via Settings if needed
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for release history.
 
 ## Versioning
 

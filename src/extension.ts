@@ -66,6 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   let showDecoded = true;
+  let showHover = true;
 
   function updateDecorations(editor: vscode.TextEditor | undefined) {
     if (!editor || !showDecoded) {
@@ -109,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const hoverProvider: vscode.HoverProvider = {
     provideHover(document, position) {
-      if (document.languageId !== 'routeros') {
+      if (!showHover || document.languageId !== 'routeros') {
         return;
       }
 
@@ -244,6 +245,13 @@ export function activate(context: vscode.ExtensionContext) {
     updateDecorations(vscode.window.activeTextEditor);
   });
 
+  const toggleHoverCommand = vscode.commands.registerCommand('routerosEncoding.toggleHover', () => {
+    showHover = !showHover;
+    vscode.window.showInformationMessage(
+      `RouterOS Encoding: Hover preview ${showHover ? 'ON' : 'OFF'}`
+    );
+  });
+
   const configListener = vscode.workspace.onDidChangeConfiguration((e) => {
     if (
       e.affectsConfiguration('routerosHexDecoder.inlinePrefix') ||
@@ -259,6 +267,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     decorationType,
     toggleCommand,
+    toggleHoverCommand,
     searchCommand,
     configListener,
     vscode.languages.registerHoverProvider('routeros', hoverProvider),
