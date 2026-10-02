@@ -1,9 +1,10 @@
 import * as assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { extractSearchFields, findInFields } from './commentSearch';
+import { DEFAULT_SEARCH_BOUNDARIES, extractSearchFields, findInFields, SearchBoundaryCharacters } from './commentSearch';
 
-function search(input: string, query: string, mode: 'comments' | 'commentsAndSource' = 'comments') {
-  return findInFields(extractSearchFields(input), query, mode);
+function search(input: string, query: string, mode: 'comments' | 'commentsAndSource' = 'comments',
+  boundaries: SearchBoundaryCharacters = DEFAULT_SEARCH_BOUNDARIES) {
+  return findInFields(extractSearchFields(input), query, mode, boundaries);
 }
 
 test('searches decoded UTF-8 and literal text in comments, case-insensitively', () => {
@@ -28,6 +29,40 @@ test('leading space also matches the start of a quoted comment but not a word su
   const script = 'add source=":log info \\"LAN интерфейс\\"; :log info \\"HomeLAN\\""';
   assert.equal(search(script, ' lan').length, 0);
   assert.equal(search(script, ' lan', 'commentsAndSource').length, 1);
+});
+
+test('leading and trailing spaces match configured delimiters and value edges', () => {
+  const input = ['LAN', '[LAN ', ' LAN}', '[LAN=', 'LAN)', 'LAN-222', 'HomeLAN', 'blank', 'LAN='].map(value =>
+    `add comment="${value}"`).join('\n');
+  const matches = search(input, ' lan ');
+  assert.deepEqual(matches.map(match => input.slice(match.start, match.end)),
+    ['LAN', '[LAN ', ' LAN}', '[LAN=', 'LAN)', 'LAN=']);
+  assert.equal(search(input, ' lan=').length, 2);
+  assert.equal(search(input, ' lan').length, 7);
+  assert.equal(search(input, 'lan ').length, 7);
+  assert.equal(search('add comment="LAN-222"', 'lan ').length, 0);
+  assert.equal(search('add comment="LAN"', ' lan ')[0].decodedLength, 3);
+});
+
+test('hash is a leading boundary by default but not a trailing boundary', () => {
+  const input = 'add comment="prefix#LAN LAN# #LAN="';
+  assert.deepEqual(search(input, ' lan').map(match => input.slice(match.start, match.end)),
+    ['#LAN', ' LAN', '#LAN']);
+  assert.deepEqual(search(input, ' lan ').map(match => input.slice(match.start, match.end)),
+    ['#LAN ', '#LAN=']);
+  assert.equal(search('add comment="prefix#LAN"', 'lan ').length, 1);
+  assert.equal(search('add comment="LAN#more"', 'lan ').length, 0);
+});
+
+test('custom leading and trailing characters apply independently without changing literal queries', () => {
+  const input = 'add comment="[LAN} |LAN! LAN="';
+  const boundaries = { leading: ' |', trailing: ' !' };
+  assert.deepEqual(search(input, ' lan ', 'comments', boundaries).map(match => input.slice(match.start, match.end)),
+    ['|LAN!']);
+  assert.equal(search(input, ' lan=', 'comments', boundaries).length, 1);
+  assert.equal(search(input, '[lan}', 'comments', boundaries).length, 1);
+  assert.equal(search(input, ' lan ', 'comments', { leading: '', trailing: '' }).length, 0);
+  assert.equal(search('add comment="LAN"', ' lan ', 'comments', { leading: '', trailing: '' }).length, 1);
 });
 
 test('finds mixed encoded and literal text across continued lines', () => {

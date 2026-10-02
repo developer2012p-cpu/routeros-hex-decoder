@@ -1,5 +1,15 @@
 export type SearchMode = 'comments' | 'commentsAndSource';
 
+export interface SearchBoundaryCharacters {
+  leading: string;
+  trailing: string;
+}
+
+export const DEFAULT_SEARCH_BOUNDARIES: SearchBoundaryCharacters = {
+  leading: ' "\'([{=,:;.!?#',
+  trailing: ' "\')]}=,:;.!?',
+};
+
 export interface SearchField {
   kind: 'comment' | 'source';
   text: string;
@@ -148,19 +158,31 @@ function skipQuoted(input: string, start: number): number {
   return i;
 }
 
-export function findInFields(fields: SearchField[], query: string, mode: SearchMode): SearchMatch[] {
+export function findInFields(fields: SearchField[], query: string, mode: SearchMode,
+  boundaries: SearchBoundaryCharacters = DEFAULT_SEARCH_BOUNDARIES): SearchMatch[] {
   if (!query) return [];
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(query.startsWith(' ') && query.length > 1
-    ? `(?:(?:^|(?<=\"))${escaped.slice(1)}|${escaped})` : escaped, 'giu');
+  const leadingSpace = query.startsWith(' ') && query.length > 1;
+  const trailingSpace = query.endsWith(' ') && query.length > 1;
+  const core = query.slice(leadingSpace ? 1 : 0, trailingSpace ? -1 : undefined);
+  const searchText = core || query;
+  const escaped = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(escaped, 'giu');
   const results: SearchMatch[] = [];
   for (const field of fields) {
     if (field.kind === 'source' && mode === 'comments') continue;
     for (const match of field.text.matchAll(pattern)) {
-      const start = match.index;
-      const end = start + match[0].length;
+      let start = match.index;
+      let end = start + match[0].length;
+      if (core && leadingSpace) {
+        if (start > 0 && boundaries.leading.includes(field.text[start - 1])) start--;
+        else if (start !== 0) continue;
+      }
+      if (core && trailingSpace) {
+        if (end < field.text.length && boundaries.trailing.includes(field.text[end])) end++;
+        else if (end !== field.text.length) continue;
+      }
       results.push({ field, start: field.positions[start].start, end: field.positions[end - 1].end,
-        decodedOffset: start, decodedLength: match[0].length });
+        decodedOffset: start, decodedLength: end - start });
     }
   }
   return results.sort((a, b) => a.start - b.start);

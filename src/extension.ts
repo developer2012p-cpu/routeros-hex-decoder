@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { extractSearchFields, findInFields, SearchMatch, SearchMode } from './commentSearch';
+import { DEFAULT_SEARCH_BOUNDARIES, extractSearchFields, findInFields, SearchMatch, SearchMode } from './commentSearch';
 
 const HEX_PATTERN = /\\([0-9A-Fa-f]{2})/g;
 // Matches quoted strings that may span multiple lines with backslash continuation
@@ -196,7 +196,11 @@ export function activate(context: vscode.ExtensionContext) {
         fields = extractSearchFields(document.getText());
         indexedVersion = document.version;
       }
-      const matches = findInFields(fields, query, mode);
+      const config = vscode.workspace.getConfiguration('routerosHexDecoder', document.uri);
+      const matches = findInFields(fields, query, mode, {
+        leading: config.get('searchLeadingCharacters', DEFAULT_SEARCH_BOUNDARIES.leading),
+        trailing: config.get('searchTrailingCharacters', DEFAULT_SEARCH_BOUNDARIES.trailing),
+      });
       picker.items = matches.map(match => {
         const line = document.positionAt(match.start).line + 1;
         const preview = match.field.text.slice(Math.max(0, match.decodedOffset - 30),
@@ -219,6 +223,10 @@ export function activate(context: vscode.ExtensionContext) {
       update();
     });
     picker.onDidChangeValue(update);
+    const searchSettingsListener = vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration('routerosHexDecoder.searchLeadingCharacters', document.uri)
+        || e.affectsConfiguration('routerosHexDecoder.searchTrailingCharacters', document.uri)) update();
+    });
     const documentListener = vscode.workspace.onDidChangeTextDocument(e => {
       if (e.document === document) update();
     });
@@ -231,6 +239,7 @@ export function activate(context: vscode.ExtensionContext) {
       picker.hide();
     });
     picker.onDidHide(() => {
+      searchSettingsListener.dispose();
       documentListener.dispose();
       picker.dispose();
     });

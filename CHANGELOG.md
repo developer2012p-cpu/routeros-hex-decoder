@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.2] - 2026-10-02
+
+### Changed
+- Treat `#` as a leading search boundary by default; document the search boundary settings in the Settings table.
+
+## [0.4.1] - 2026-10-02
+
+### Added
+- Configure leading and trailing search boundary characters separately in Settings; spaces at the edges of a query also match value boundaries and configured delimiters.
+
 ## [0.4.0] - 2026-10-02
 
 ### Added
@@ -38,6 +48,8 @@ All notable changes to this project are documented here.
 ### Improved
 - Decode RouterOS `\XX` byte sequences as UTF-8 for editor previews.
 
+[0.4.2]: https://github.com/developer2012p-cpu/routeros-hex-decoder/releases/tag/v0.4.2
+[0.4.1]: https://github.com/developer2012p-cpu/routeros-hex-decoder/releases/tag/v0.4.1
 [0.4.0]: https://github.com/developer2012p-cpu/routeros-hex-decoder/releases/tag/v0.4.0
 [0.3.4]: https://github.com/developer2012p-cpu/routeros-hex-decoder/releases/tag/v0.3.4
 [0.3.3]: https://github.com/developer2012p-cpu/routeros-hex-decoder/releases/tag/v0.3.3

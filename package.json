@@ -3,7 +3,7 @@
   "displayName": "RouterOS Hex Decoder",
   "description": "Decode RouterOS \\XX hex-encoded UTF-8 in .rsc exports, with hover, inline display, and decoded comment and script search.",
   "icon": "icon/RouterOS_HD.png",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "publisher": "developer2012p",
   "license": "SEE LICENSE IN readme.md",
   "repository": {
@@ -76,6 +76,16 @@
           "type": "string",
           "default": ")",
           "description": "Closing sequence for inline decoded text"
+        },
+        "routerosHexDecoder.searchLeadingCharacters": {
+          "type": "string",
+          "default": " \"'([{=,:;.!?#",
+          "description": "Characters treated as a leading space in comment and script search. The start of a value also counts as a boundary."
+        },
+        "routerosHexDecoder.searchTrailingCharacters": {
+          "type": "string",
+          "default": " \"')]}=,:;.!?",
+          "description": "Characters treated as a trailing space in comment and script search. The end of a value also counts as a boundary."
         }
       }
     },
